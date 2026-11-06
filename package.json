@@ -1,0 +1,28 @@
+{
+  "name": "markrag-api",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "description": "High-performance REST microservice that converts any web URL into clean, structured Markdown for LLMs and Vector DBs.",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "axios": "^1.21.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "jsdom": "^29.1.1",
+    "lru-cache": "^11.5.3",
+    "turndown": "^7.2.5",
+    "turndown-plugin-gfm": "^1.0.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.1"
+  }
+}
