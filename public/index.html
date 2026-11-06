@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkRAG API - Web to Clean Markdown & RAG Parser for AI Agents</title>
+  <meta name="description" content="High-performance REST API converting any web article or documentation into clean, structured Markdown for LLMs and Vector Databases with 90%+ token savings.">
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#090d16',
+              surface: '#0d1322',
+              card: '#11192e',
+              border: '#1f293d',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #090d16;
+      font-family: 'Inter', sans-serif;
+    }
+    .bg-grid-pattern {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .glow-radial {
+      background: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.18), rgba(6, 182, 212, 0.08) 35%, transparent 70%);
+    }
+    .glass-card {
+      background: rgba(17, 25, 46, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(31, 41, 61, 0.8);
+    }
+    .glass-card:hover {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+  </style>
+</head>
+<body class="text-slate-300 min-h-screen bg-brand-dark bg-grid-pattern selection:bg-emerald-500/30 selection:text-emerald-300">
+
+  <!-- Top Ambient Glow -->
+  <div class="fixed top-0 left-0 right-0 h-96 glow-radial pointer-events-none z-0"></div>
+
+  <!-- Header / Navigation -->
+  <header class="relative z-10 border-b border-brand-border/60 bg-brand-dark/80 backdrop-blur-md sticky top-0">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 p-0.5 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-brand-dark rounded-[7px] flex items-center justify-center">
+            <span class="text-emerald-400 font-mono font-bold text-lg">M#</span>
+          </div>
+        </div>
+        <span class="text-white font-bold text-xl tracking-tight">Mark<span class="text-emerald-400">RAG</span> <span class="text-xs uppercase px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-mono">API</span></span>
+      </a>
+
+      <!-- Right Nav Elements -->
+      <div class="flex items-center gap-3 sm:gap-5">
+        <!-- Live Health Pulse Badge -->
+        <a href="/health" target="_blank" title="Check API Health Status" class="inline-flex items-center gap-2 px-3 py-1 text-xs font-mono font-medium rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 hover:border-emerald-600 hover:bg-emerald-950 transition-colors">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="hidden sm:inline">All Systems Operational</span>
+          <span class="sm:hidden">Operational</span>
+        </a>
+
+        <!-- RapidAPI CTA Button -->
+        <a href="https://rapidapi.com/artuturoh/api/markrag-web-to-clean-markdown-and-rag-parser" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-brand-dark bg-emerald-400 hover:bg-emerald-300 transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5">
+          <span>RapidAPI</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-20">
+    <div class="text-center max-w-3xl mx-auto">
+      
+      <!-- Feature Announcement Pill -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-surface border border-brand-border text-xs font-medium text-slate-300 mb-6 shadow-sm">
+        <span class="flex h-2 w-2 rounded-full bg-cyan-400"></span>
+        <span>Powered by Mozilla Readability & GFM Markdown</span>
+      </div>
+
+      <!-- Main Heading -->
+      <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight sm:leading-none mb-6">
+        Web to Clean Markdown <br class="hidden sm:inline"/>
+        <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">for AI & RAG Pipelines</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-lg sm:text-xl text-slate-400 leading-relaxed mb-10">
+        Web to Clean Markdown & RAG Parser for AI Agents and Vector Databases. Automatically strips cookie banners, navigation menus, ads, and tracking footers. Delivers crisp, structured Markdown with tables and code blocks ready for embeddings.
+      </p>
+
+      <!-- Primary CTA Actions -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <a href="https://rapidapi.com/artuturoh/api/markrag-web-to-clean-markdown-and-rag-parser" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl font-bold text-base text-brand-dark bg-emerald-400 hover:bg-emerald-300 transition-all shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <span>Subscribe on RapidAPI</span>
+        </a>
+        <a href="#quickstart" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-medium text-base text-slate-300 bg-brand-surface hover:bg-brand-card border border-brand-border hover:border-slate-600 transition-all">
+          <span class="font-mono text-emerald-400">&gt;</span> Quickstart Code
+        </a>
+      </div>
+    </div>
+
+    <!-- 4 Featured Metric Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+      
+      <!-- Metric 1: Token Savings -->
+      <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        <div class="text-3xl font-extrabold text-white tracking-tight mb-1">90%+</div>
+        <div class="text-emerald-400 font-semibold text-sm mb-2">Token Savings</div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Reducción drástica del tamaño del contexto para LLMs. Elimina HTML redundante y scripts para maximizar la ventana de atención.
+        </p>
+      </div>
+
+      <!-- Metric 2: Cached Latency -->
+      <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="text-3xl font-extrabold text-white tracking-tight mb-1">&lt; 2ms</div>
+        <div class="text-cyan-400 font-semibold text-sm mb-2">Cached Latency</div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Búsquedas instantáneas en memoria RAM con LRU Cache (TTL de 15 minutos) para acelerar respuestas recurrentes en producción.
+        </p>
+      </div>
+
+      <!-- Metric 3: GFM & Tables -->
+      <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4 text-teal-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div class="text-3xl font-extrabold text-white tracking-tight mb-1">GFM & Tables</div>
+        <div class="text-teal-400 font-semibold text-sm mb-2">Structured Extraction</div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Extracción limpia preservando tablas, listas y bloques de código con su lenguaje especificado (<code class="text-xs font-mono text-emerald-300">```python</code>, <code class="text-xs font-mono text-emerald-300">```sql</code>).
+        </p>
+      </div>
+
+      <!-- Metric 4: Anti-Bot Emulation -->
+      <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div class="text-3xl font-extrabold text-white tracking-tight mb-1">Anti-Bot</div>
+        <div class="text-emerald-400 font-semibold text-sm mb-2">Browser Emulation</div>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Rotación de User-Agents reales (Chrome, Safari, Firefox), headers realistas y descompresión gzip/brotli para evitar bloqueos 403.
+        </p>
+      </div>
+    </div>
+
+    <!-- Interactive Code Quickstart Section -->
+    <div id="quickstart" class="max-w-4xl mx-auto scroll-mt-24">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Extract Any Webpage in 3 Lines</h2>
+        <p class="text-slate-400 text-sm mt-2">Plug MarkRAG API into your existing Python, Node.js, or cURL pipeline.</p>
+      </div>
+
+      <!-- Code Box -->
+      <div class="rounded-2xl border border-brand-border bg-brand-surface overflow-hidden shadow-2xl">
+        
+        <!-- Header with Tabs & Copy -->
+        <div class="flex items-center justify-between border-b border-brand-border bg-brand-card/90 px-4 py-3">
+          
+          <!-- Language Tabs -->
+          <div class="flex items-center gap-2">
+            <button onclick="switchTab('curl')" id="tab-curl" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all">
+              cURL
+            </button>
+            <button onclick="switchTab('python')" id="tab-python" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+              Python
+            </button>
+            <button onclick="switchTab('node')" id="tab-node" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+              Node.js
+            </button>
+          </div>
+
+          <!-- Copy Button -->
+          <button onclick="copySnippet()" id="copy-btn" class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white font-mono px-3 py-1.5 rounded-lg bg-brand-surface border border-brand-border hover:border-slate-600 transition-colors">
+            <svg id="copy-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span id="copy-text">Copy</span>
+          </button>
+        </div>
+
+        <!-- Code Snippet Displays -->
+        <div class="p-5 font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed">
+          
+          <!-- cURL Snippet -->
+          <pre id="code-curl" class="text-slate-300"><code><span class="text-cyan-400">curl</span> -X POST <span class="text-emerald-300">"https://markrag-api.onrender.com/v1/extract"</span> \
+  -H <span class="text-emerald-300">"Content-Type: application/json"</span> \
+  -H <span class="text-emerald-300">"X-RapidAPI-Key: YOUR_RAPIDAPI_KEY"</span> \
+  -d <span class="text-amber-200">'{
+    "url": "https://example.com/blog/rag-pipeline",
+    "options": { "strip_links": true }
+  }'</span></code></pre>
+
+          <!-- Python Snippet -->
+          <pre id="code-python" class="hidden text-slate-300"><code><span class="text-cyan-400">import</span> requests
+
+response = requests.post(
+    <span class="text-emerald-300">"https://markrag-api.onrender.com/v1/extract"</span>,
+    headers={<span class="text-emerald-300">"X-RapidAPI-Key"</span>: <span class="text-amber-200">"YOUR_RAPIDAPI_KEY"</span>},
+    json={
+        <span class="text-emerald-300">"url"</span>: <span class="text-amber-200">"https://example.com/blog/rag-pipeline"</span>,
+        <span class="text-emerald-300">"options"</span>: {<span class="text-emerald-300">"strip_links"</span>: <span class="text-cyan-400">True</span>}
+    }
+)
+
+data = response.json()[<span class="text-emerald-300">"data"</span>]
+print(f<span class="text-amber-200">"Title: {data['title']} (Saved {data['metadata']['savingsPercentage']}%)"</span>)
+print(data[<span class="text-emerald-300">"markdown"</span>])</code></pre>
+
+          <!-- Node.js Snippet -->
+          <pre id="code-node" class="hidden text-slate-300"><code><span class="text-cyan-400">const</span> res = <span class="text-cyan-400">await</span> fetch(<span class="text-emerald-300">"https://markrag-api.onrender.com/v1/extract"</span>, {
+  method: <span class="text-emerald-300">"POST"</span>,
+  headers: {
+    <span class="text-emerald-300">"Content-Type"</span>: <span class="text-emerald-300">"application/json"</span>,
+    <span class="text-emerald-300">"X-RapidAPI-Key"</span>: <span class="text-amber-200">"YOUR_RAPIDAPI_KEY"</span>
+  },
+  body: JSON.stringify({
+    url: <span class="text-amber-200">"https://example.com/blog/rag-pipeline"</span>,
+    options: { strip_links: <span class="text-cyan-400">true</span> }
+  })
+});
+
+<span class="text-cyan-400">const</span> { data } = <span class="text-cyan-400">await</span> res.json();
+console.log(data.markdown);</code></pre>
+        </div>
+
+        <!-- Sample Response Preview -->
+        <div class="border-t border-brand-border bg-brand-dark/90 p-4">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
+            <span>JSON Response Contract:</span>
+            <span class="text-emerald-400 font-semibold">200 OK · 142ms</span>
+          </div>
+          <div class="p-3 bg-brand-surface rounded-lg font-mono text-xs text-slate-400 overflow-x-auto border border-brand-border/60">
+            <span class="text-slate-500">{</span><br/>
+            &nbsp;&nbsp;<span class="text-cyan-400">"success"</span>: <span class="text-emerald-400">true</span>,<br/>
+            &nbsp;&nbsp;<span class="text-cyan-400">"data"</span>: <span class="text-slate-500">{</span><br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"title"</span>: <span class="text-emerald-300">"Building Modern RAG Systems"</span>,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"publishedTime"</span>: <span class="text-emerald-300">"2024-05-01T12:00:00Z"</span>,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"markdown"</span>: <span class="text-emerald-300">"# Building Modern RAG Systems\n\nRetrieval-Augmented Generation..."</span>,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"metadata"</span>: <span class="text-slate-500">{</span><br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"estimatedTokens"</span>: <span class="text-amber-300">1820</span>,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"rawHtmlTokens"</span>: <span class="text-amber-300">19450</span>,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"tokensSaved"</span>: <span class="text-amber-300">17630</span>,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"savingsPercentage"</span>: <span class="text-emerald-400">90.6</span>,<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"cached"</span>: <span class="text-cyan-400">false</span><br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">}</span><br/>
+            &nbsp;&nbsp;<span class="text-slate-500">}</span><br/>
+            <span class="text-slate-500">}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-brand-border bg-brand-surface/70 py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400 font-semibold">MarkRAG API</span>
+        <span>•</span>
+        <span>High-Performance Microservice for AI Developers</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/health" class="hover:text-emerald-400 transition-colors">/health</a>
+        <span>•</span>
+        <a href="https://rapidapi.com/artuturoh/api/markrag-web-to-clean-markdown-and-rag-parser" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 transition-colors">RapidAPI Marketplace</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Code Tab Switcher & Copy Handler -->
+  <script>
+    let activeSnippet = 'curl';
+
+    const snippets = {
+      curl: `curl -X POST "https://markrag-api.onrender.com/v1/extract" \\
+  -H "Content-Type: application/json" \\
+  -H "X-RapidAPI-Key: YOUR_RAPIDAPI_KEY" \\
+  -d '{
+    "url": "https://example.com/blog/rag-pipeline",
+    "options": { "strip_links": true }
+  }'`,
+      python: `import requests
+
+response = requests.post(
+    "https://markrag-api.onrender.com/v1/extract",
+    headers={"X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY"},
+    json={
+        "url": "https://example.com/blog/rag-pipeline",
+        "options": {"strip_links": True}
+    }
+)
+
+data = response.json()["data"]
+print(f"Title: {data['title']} (Saved {data['metadata']['savingsPercentage']}%)")
+print(data["markdown"])`,
+      node: `const res = await fetch("https://markrag-api.onrender.com/v1/extract", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY"
+  },
+  body: JSON.stringify({
+    url: "https://example.com/blog/rag-pipeline",
+    options: { strip_links: true }
+  })
+});
+
+const { data } = await res.json();
+console.log(data.markdown);`
+    };
+
+    function switchTab(lang) {
+      activeSnippet = lang;
+      ['curl', 'python', 'node'].forEach(function(l) {
+        const btn = document.getElementById('tab-' + l);
+        const code = document.getElementById('code-' + l);
+        if (l === lang) {
+          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all';
+          code.classList.remove('hidden');
+        } else {
+          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all';
+          code.classList.add('hidden');
+        }
+      });
+    }
+
+    function copySnippet() {
+      const text = snippets[activeSnippet];
+      navigator.clipboard.writeText(text).then(function() {
+        const copyText = document.getElementById('copy-text');
+        copyText.textContent = 'Copied!';
+        setTimeout(function() {
+          copyText.textContent = 'Copy';
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

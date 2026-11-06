@@ -19,6 +19,44 @@ describe('MarkRAG API Endpoints', () => {
     config.rapidApiProxySecret = null;
   });
 
+  describe('GET / (Root Landing Page & Content Negotiation)', () => {
+    it('should serve HTML landing page when Accept includes text/html', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Accept', 'text/html,application/xhtml+xml');
+
+      assert.strictEqual(res.status, 200);
+      assert.ok(res.headers['content-type'].includes('text/html'));
+      assert.ok(res.text.includes('MarkRAG API'));
+      assert.ok(res.text.includes('All Systems Operational'));
+      assert.ok(res.text.includes('Subscribe on RapidAPI'));
+      assert.ok(res.text.includes('90%+'));
+    });
+
+    it('should serve JSON metadata when Accept is application/json', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Accept', 'application/json');
+
+      assert.strictEqual(res.status, 200);
+      assert.ok(res.headers['content-type'].includes('application/json'));
+      assert.strictEqual(res.body.service, 'MarkRAG API');
+      assert.strictEqual(res.body.status, 'online');
+      assert.ok(res.body.endpoints);
+      assert.ok(res.body.endpoints.extractPost);
+      assert.ok(res.body.rapidApi);
+    });
+
+    it('should include customized Helmet CSP headers allowing Tailwind CDN and Google Fonts', async () => {
+      const res = await request(app).get('/');
+      const csp = res.headers['content-security-policy'] || '';
+
+      assert.ok(csp.includes('cdn.tailwindcss.com'));
+      assert.ok(csp.includes('fonts.googleapis.com'));
+      assert.ok(csp.includes('fonts.gstatic.com'));
+    });
+  });
+
   describe('GET /health', () => {
     it('should return 200 OK with health and memory statistics', async () => {
       const res = await request(app).get('/health');
