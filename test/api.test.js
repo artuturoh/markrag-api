@@ -47,10 +47,13 @@ describe('MarkRAG API Endpoints', () => {
       assert.ok(res.body.rapidApi);
     });
 
-    it('should include customized Helmet CSP headers allowing Tailwind CDN and Google Fonts', async () => {
+    it('should include customized Helmet CSP headers allowing unsafe-inline in script-src and script-src-attr', async () => {
       const res = await request(app).get('/');
       const csp = res.headers['content-security-policy'] || '';
 
+      assert.ok(csp.includes('script-src'));
+      assert.ok(csp.includes("'unsafe-inline'"));
+      assert.ok(csp.includes('script-src-attr'));
       assert.ok(csp.includes('cdn.tailwindcss.com'));
       assert.ok(csp.includes('fonts.googleapis.com'));
       assert.ok(csp.includes('fonts.gstatic.com'));

@@ -8,17 +8,18 @@ import { logger } from './utils/logger.js';
 
 const app = express();
 
-// Security headers with Helmet and Content Security Policy tailored for Tailwind CDN & Google Fonts
+// Security headers with Helmet and Content Security Policy tailored for Apple Glassmorphism UI, Tailwind CDN & Google Fonts
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com'],
+        scriptSrcAttr: ["'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
         imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", 'https:'],
       },
     },
   })

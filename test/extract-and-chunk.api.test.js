@@ -219,4 +219,82 @@ describe('MarkRAG v2.0 — POST /v1/extract-and-chunk & Studio Endpoints', () =>
     assert.strictEqual(resOverLimit.status, 429);
     assert.strictEqual(resOverLimit.body.error.code, 'RATE_LIMIT_EXCEEDED');
   });
+
+  it('should accurately parse rich multi-section HTML articles with ~85-90% token compression ratio', async () => {
+    resetDemoRateLimiter();
+
+    const richArticle = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Architecture of Modern Production RAG Systems</title>
+          <meta name="author" content="Dr. Elena Vance">
+          <meta name="description" content="A comprehensive engineering deep dive into high-throughput Retrieval-Augmented Generation">
+          <link rel="canonical" href="https://systems.example.ai/articles/modern-rag-architecture">
+          <style>
+            ${'/* boilerplate noise stylesheet for responsive web layout and animations */\n.nav-item { color: #333; display: flex; margin: 10px; padding: 5px; }\n'.repeat(60)}
+          </style>
+          <script>
+            ${'// analytics, telemetry, tag managers, and ad tracking network payloads\nwindow.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}\n'.repeat(60)}
+          </script>
+        </head>
+        <body>
+          <nav>
+            <a href="/">Home</a>
+            ${'<a href="/section">Section Link</a>\n'.repeat(20)}
+          </nav>
+          <aside class="advertisement">
+            <p>Buy cloud compute and GPUs today!</p>
+          </aside>
+          <main>
+            <article>
+              <h1>Architecture of Modern Production RAG Systems</h1>
+              <p>Retrieval-Augmented Generation (RAG) grounds pretrained large language models with external vector search indexes, achieving factual accuracy while minimizing fine-tuning costs across enterprise deployments.</p>
+              <p>By coupling neural information retrieval with high-capacity generative transformers, production AI systems can dynamically inject verifiable, domain-specific contextual knowledge into LLM prompts at inference time without requiring parameter retraining or complex gradient updates.</p>
+              <h2>1. The Knowledge Ingestion and Chunking Dilemma</h2>
+              <p>When engineering an ingestion pipeline, documents must be converted into clean Markdown before semantic chunking. Standard naive character splitting regularly fragments code blocks, truncates tables, and loses the section hierarchy necessary for contextual retrieval.</p>
+              <p>Hierarchy-aware semantic chunking guarantees that document boundaries and section titles are tracked across nested sections, providing enriched embedding vectors that significantly enhance recall metrics across multi-hop reasoning tasks.</p>
+              <h2>2. Benchmark Comparison of Production Vector Indexes</h2>
+              <table>
+                <thead>
+                  <tr><th>Vector Database</th><th>Index Algorithm</th><th>Recall @ 10</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Qdrant Cloud</td><td>HNSW</td><td>0.984</td></tr>
+                  <tr><td>Pinecone</td><td>HNSW</td><td>0.978</td></tr>
+                </tbody>
+              </table>
+              <h2>3. Idempotent Vector Upsert Implementation</h2>
+              \`\`\`python
+              def upsert_records(client, chunks):
+                  return client.upsert(chunks)
+              \`\`\`
+            </article>
+          </main>
+          <footer>
+            ${'<p>&copy; 2026 AI Systems Engineering Review. All rights reserved.</p>\n'.repeat(10)}
+          </footer>
+        </body>
+      </html>
+    `;
+
+    const res = await request(app)
+      .post('/v1/demo')
+      .send({
+        html: richArticle,
+        url: 'https://systems.example.ai/articles/modern-rag-architecture',
+        options: { chunkSizeTokens: 512 }
+      });
+
+    assert.strictEqual(res.status, 200);
+    const data = res.body.data;
+    assert.strictEqual(data.metadata.title, 'Architecture of Modern Production RAG Systems');
+    assert.strictEqual(data.metadata.author, 'Dr. Elena Vance');
+    assert.ok(data.chunks.length >= 1);
+    assert.ok(data.cleaningStats.compressionRatioPercentage >= 80, `Expected >= 80% compression, got ${data.cleaningStats.compressionRatioPercentage}%`);
+    assert.ok(data.cleaningStats.tokensSaved > 500);
+    assert.ok(data.cleaningStats.removedElements.scripts >= 1);
+    assert.ok(data.cleaningStats.removedElements.navs >= 1);
+    assert.strictEqual(data.qualityDiagnostics.status, 'optimal');
+  });
 });

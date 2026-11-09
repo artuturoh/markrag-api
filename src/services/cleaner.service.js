@@ -79,8 +79,9 @@ export class CleanerService {
       // Extract metadata before Readability modifies DOM
       const metadata = this.extractDocumentMetadata(document);
 
-      // If stripBoilerplate is true (default), we can remove script/style tags if readability misses any
-      const reader = new Readability(document, {
+      // Clone document for Readability so original DOM retains all noise elements (scripts, styles, navs, footers, ads) for intelligence analysis
+      const readerDoc = document.cloneNode(true);
+      const reader = new Readability(readerDoc, {
         keepClasses: false,
         charThreshold: 30,
       });
