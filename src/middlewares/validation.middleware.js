@@ -53,6 +53,32 @@ export const getExtractSchema = z.object({
   },
 }));
 
+// POST /v1/extract-and-chunk body schema (MarkRAG v2.0)
+export const extractAndChunkSchema = z
+  .object({
+    url: z
+      .string()
+      .trim()
+      .url({ message: 'Invalid URL format' })
+      .refine((url) => /^https?:\/\//i.test(url), { message: 'URL must use HTTP or HTTPS protocol' })
+      .optional(),
+    html: z.string().optional(),
+    options: z
+      .object({
+        chunkSizeTokens: z.coerce.number().int().min(16).max(4096).default(512),
+        chunkOverlapTokens: z.coerce.number().int().min(0).max(500).default(50),
+        includeLinks: z.boolean().default(true),
+        includeImages: z.boolean().default(false),
+        stripBoilerplate: z.boolean().default(true),
+        strip_links: z.boolean().optional(),
+      })
+      .default({}),
+  })
+  .refine((data) => Boolean(data.url || (data.html && data.html.trim().length > 0)), {
+    message: 'Either url or html must be provided',
+    path: ['url'],
+  });
+
 /**
  * Middleware factory for validating request body or query with a Zod schema
  */

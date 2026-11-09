@@ -5,14 +5,18 @@ const { gfm } = gfmPlugin;
 
 export class MarkdownService {
   constructor() {
-    this.baseTurndown = this.createTurndownService({ stripLinks: false });
-    this.stripLinksTurndown = this.createTurndownService({ stripLinks: true });
+    this.services = new Map();
   }
 
   /**
    * Instantiates a TurndownService instance configured with GFM and formatting rules
    */
-  createTurndownService({ stripLinks = false } = {}) {
+  createTurndownService({ stripLinks = false, includeImages = true } = {}) {
+    const key = `${stripLinks}:${includeImages}`;
+    if (this.services.has(key)) {
+      return this.services.get(key);
+    }
+
     const service = new TurndownService({
       headingStyle: 'atx',
       hr: '---',
@@ -52,6 +56,15 @@ export class MarkdownService {
       });
     }
 
+    // Rule: Strip images if not included
+    if (!includeImages) {
+      service.addRule('stripImages', {
+        filter: 'img',
+        replacement: () => '',
+      });
+    }
+
+    this.services.set(key, service);
     return service;
   }
 
@@ -60,6 +73,8 @@ export class MarkdownService {
    * @param {string} html Clean HTML from Readability
    * @param {Object} [options]
    * @param {boolean} [options.strip_links=false]
+   * @param {boolean} [options.includeLinks=true]
+   * @param {boolean} [options.includeImages=true]
    * @returns {string} Clean Markdown
    */
   convertToMarkdown(html, options = {}) {
@@ -67,8 +82,12 @@ export class MarkdownService {
       return '';
     }
 
-    const stripLinks = Boolean(options.strip_links);
-    const service = stripLinks ? this.stripLinksTurndown : this.baseTurndown;
+    const stripLinks = Boolean(
+      options.strip_links === true || options.includeLinks === false
+    );
+    const includeImages = options.includeImages !== false;
+
+    const service = this.createTurndownService({ stripLinks, includeImages });
 
     let markdown = service.turndown(html);
 

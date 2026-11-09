@@ -1,9 +1,9 @@
 {
   "name": "markrag-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "main": "src/server.js",
-  "description": "High-performance REST microservice that converts any web URL into clean, structured Markdown for LLMs and Vector DBs.",
+  "description": "MarkRAG v2.0 — Intelligent RAG Knowledge Preprocessor, Semantic Chunker & Web-to-Markdown Engine.",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",

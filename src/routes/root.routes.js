@@ -15,12 +15,14 @@ router.get('/', (req, res) => {
 
   return res.status(200).json({
     service: 'MarkRAG API',
-    version: '1.0.0',
-    description: 'Web to Clean Markdown & RAG Parser for AI Agents and Vector Databases',
+    version: '2.0.0',
+    description: 'Intelligent RAG Knowledge Preprocessor, Semantic Chunker & Web-to-Markdown Engine',
     status: 'online',
     endpoints: {
+      extractAndChunk: 'POST /v1/extract-and-chunk',
       extractPost: 'POST /v1/extract',
       extractGet: 'GET /v1/extract?url={url}',
+      demo: 'POST /v1/demo',
       health: 'GET /health',
     },
     rapidApi: 'https://rapidapi.com/artuturoh/api/markrag-web-to-clean-markdown-and-rag-parser',

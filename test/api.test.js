@@ -27,9 +27,9 @@ describe('MarkRAG API Endpoints', () => {
 
       assert.strictEqual(res.status, 200);
       assert.ok(res.headers['content-type'].includes('text/html'));
-      assert.ok(res.text.includes('MarkRAG API'));
+      assert.ok(res.text.includes('MarkRAG'));
       assert.ok(res.text.includes('All Systems Operational'));
-      assert.ok(res.text.includes('Subscribe on RapidAPI'));
+      assert.ok(res.text.includes('RapidAPI'));
       assert.ok(res.text.includes('90%+'));
     });
 

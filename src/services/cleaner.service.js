@@ -64,6 +64,68 @@ export class CleanerService {
   }
 
   /**
+   * Enhanced cleaner for MarkRAG v2.0
+   * Preserves DOM access for metadata & diagnostics, falls back gracefully on thin/stub content.
+   */
+  cleanEnhanced(html, url, options = {}) {
+    if (!html || typeof html !== 'string' || html.trim().length === 0) {
+      throw new UnprocessableContentError('Empty or invalid HTML content received');
+    }
+
+    try {
+      const dom = new JSDOM(html, { url });
+      const document = dom.window.document;
+
+      // Extract metadata before Readability modifies DOM
+      const metadata = this.extractDocumentMetadata(document);
+
+      // If stripBoilerplate is true (default), we can remove script/style tags if readability misses any
+      const reader = new Readability(document, {
+        keepClasses: false,
+        charThreshold: 30,
+      });
+
+      const article = reader.parse();
+
+      let content = article?.content || '';
+      let textContent = article?.textContent?.trim() || '';
+
+      // If readability failed (e.g. thin content, simple fragment or paywall notice), fallback to body
+      if (!content || !textContent) {
+        const bodyEl = document.querySelector('body') || document.documentElement;
+        if (bodyEl) {
+          // Clone to avoid mutating original
+          const clone = bodyEl.cloneNode(true);
+          // Strip unwanted noisy tags
+          const noisy = clone.querySelectorAll('script, style, noscript, svg');
+          noisy.forEach((el) => el.remove());
+          content = clone.innerHTML;
+          textContent = clone.textContent.trim();
+        }
+      }
+
+      return {
+        dom,
+        document,
+        article,
+        title: article?.title || metadata.title || 'Untitled Document',
+        byline: article?.byline || metadata.author || null,
+        siteName: article?.siteName || metadata.siteName || null,
+        publishedTime: metadata.publishedTime || article?.publishedTime || null,
+        dir: article?.dir || metadata.dir || null,
+        lang: metadata.lang || null,
+        excerpt: article?.excerpt || metadata.description || null,
+        content,
+        textContent,
+      };
+    } catch (error) {
+      if (error instanceof UnprocessableContentError) throw error;
+      logger.error('Error during enhanced DOM parsing / cleaning', { error: error.message, url });
+      throw new UnprocessableContentError(`Failed to parse HTML document: ${error.message}`);
+    }
+  }
+
+  /**
    * Extracts useful metadata from document head and OpenGraph/Schema tags
    */
   extractDocumentMetadata(document) {

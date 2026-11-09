@@ -1,24 +1,26 @@
-# MarkRAG API ⚡
+# MarkRAG v2.0 ⚡
 
-High-performance REST microservice in Node.js and Express designed to convert any web URL (articles, technical blogs, documentation) into clean, structured Markdown optimized for LLMs (OpenAI, Anthropic, Gemini) and Vector Databases (Pinecone, Qdrant, Milvus, Chroma).
-
-It strips navigation menus, ads, sidebars, cookie banners, and footers using Mozilla Readability (the Firefox Reader View engine), converts the clean DOM into GitHub Flavored Markdown (GFM) with tables and code blocks, and computes RAG token savings metrics.
+> **Intelligent RAG Knowledge Preprocessor, Semantic Chunker & Web-to-Markdown Engine**  
+> High-performance REST microservice in Node.js and Express designed to convert any web URL or raw HTML into clean, structured Markdown and pre-chunked semantic vectors for LLMs (OpenAI, Anthropic, Gemini) and Vector Databases (Pinecone, Qdrant, Milvus, Chroma, pgvector).
 
 ---
 
-## 🚀 Key Features
+## 🚀 Key Features in v2.0
 
-- **Mozilla Readability Extraction**: Extracts the true content body, author, publication date, and metadata using the same engine as Firefox Reader View.
+- **Hierarchy-Aware Semantic Chunking**: Respects `# H1`, `## H2`, `### H3` section trees. Never cuts across fenced code blocks (```` ``` ````) or markdown table rows. Every chunk includes parent section breadcrumbs (`headingPath`), contextual embedding prefix (`contextHeader`), and deterministic 16-character SHA-256 `chunkId`.
+- **Metadata Intelligence**: Automatically infers title, author, canonical URL, publication/modification timestamps, domain, content type, markdown citations, and internal/external link breakdowns.
+- **Content Quality Diagnostics**: Evaluates RAG readiness score (0–100), detects SPA JavaScript hydration shells, flags paywalls/login walls, and warns about thin content.
+- **Mozilla Readability Extraction**: Extracts the true content body, author, publication date, and metadata using the same engine as Firefox Reader View (`@mozilla/readability`).
 - **GFM Markdown Conversion**: Converts HTML to Markdown with support for tables, lists, and fenced code blocks with language tagging via `turndown` and `turndown-plugin-gfm`.
-- **Token Efficiency (`strip_links`)**: Option to strip hyperlinks into plain text, reducing LLM token consumption by up to 20-30% additional savings.
+- **Token Efficiency (`strip_links` / `includeLinks`)**: Option to strip hyperlinks into plain text, reducing LLM token consumption by up to 20-30% additional savings.
 - **Resilient Web Fetcher**:
   - Strict **5-second timeout** to prevent hanging requests.
   - Automatic decompression of **gzip, deflate, and brotli**.
   - **User-Agent rotation** mimicking modern Chrome, Safari, and Firefox browsers to prevent basic 403 blocks.
-- **In-Memory LRU Cache**: 15-minute RAM cache (`lru-cache`) to instantly serve repeated requests.
-- **RAG & Token Metrics**: Calculates word count, estimated reading time, LLM token approximations (~4 chars/token), and savings percentage vs raw HTML.
-- **RapidAPI Ready**: Optional proxy secret validation via `X-RapidAPI-Proxy-Secret`.
-- **Production Hardened**: Native ES Modules, Express 5, Helmet, CORS, centralized error handling, and graceful shutdown (`SIGTERM`/`SIGINT`).
+- **In-Memory LRU Cache**: 15-minute RAM cache (`lru-cache`) to instantly serve repeated requests in sub-2ms.
+- **Dual Ingestion Paths**: Fetches any URL directly or parses user-supplied raw HTML strings.
+- **Interactive Live RAG Studio**: Modern dark-mode SaaS UI (`GET /`) allowing live extraction, chunk inspection, and code generation.
+- **RapidAPI Ready**: Proxy secret validation via `X-RapidAPI-Proxy-Secret` with free rate-limited demo endpoint (`POST /v1/demo`).
 
 ---
 
@@ -30,34 +32,47 @@ markrag-api/
 ├── .gitignore
 ├── package.json
 ├── README.md
+├── docs.md                             # RapidAPI Technical Documentation
+├── docs/
+│   └── RAPIDAPI_STUDIO_DOCS.md         # Comprehensive RapidAPI Studio Documentation
+├── public/
+│   └── index.html                      # Interactive Live RAG Studio & Landing Page
 ├── src/
 │   ├── app.js                          # Express application configuration
 │   ├── server.js                       # Server entry point & graceful shutdown
 │   ├── config/
 │   │   └── index.js                    # Environment settings and constants
 │   ├── controllers/
-│   │   ├── extract.controller.js       # Extract endpoint handler
+│   │   ├── chunk.controller.js         # Flagship extract-and-chunk handler
+│   │   ├── extract.controller.js       # V1 extract endpoint handler
 │   │   └── health.controller.js        # Health check handler
+│   ├── middleware/
+│   │   └── rapidapiAuth.js             # RapidAPI Proxy Secret auth & demo rate limiter
 │   ├── middlewares/
-│   │   ├── error.middleware.js         # Centralized error handler (400, 422, 504, 500)
-│   │   ├── security.middleware.js      # X-RapidAPI-Proxy-Secret validator
+│   │   ├── error.middleware.js         # Centralized error handler (400, 401, 422, 504, 500)
+│   │   ├── security.middleware.js      # Re-export for backward compatibility
 │   │   └── validation.middleware.js   # Zod request validators
 │   ├── routes/
-│   │   ├── extract.routes.js           # Routes for /v1/extract
+│   │   ├── extract.routes.js           # Routes for /v1/extract, /v1/extract-and-chunk, /v1/demo
 │   │   ├── health.routes.js            # Routes for /health
+│   │   ├── root.routes.js              # Landing page & JSON content negotiation
 │   │   └── index.js                    # Route aggregator
 │   ├── services/
 │   │   ├── cache.service.js            # LRU Cache (15m TTL)
+│   │   ├── chunker.service.js          # Hierarchy-aware semantic chunker
 │   │   ├── cleaner.service.js          # Mozilla Readability & JSDOM parser
 │   │   ├── fetcher.service.js          # Axios client with UA rotation & timeout
+│   │   ├── intelligence.service.js     # Content intelligence & RAG diagnostics
 │   │   ├── markdown.service.js         # Turndown + GFM converter
 │   │   └── token.service.js            # LLM token & reading metrics estimator
 │   └── utils/
 │       ├── errors.js                   # Standardized AppError hierarchy
 │       └── logger.js                   # Structured logger
 └── test/
-    ├── api.test.js                     # Endpoint integration tests
+    ├── api.test.js                     # Root, health, and v1 endpoints integration tests
+    ├── chunker.service.test.js         # Semantic chunking & breadcrumb tests
     ├── cleaner.service.test.js         # Parser & cleaner unit tests
+    ├── extract-and-chunk.api.test.js   # Flagship v2 endpoint & studio tests
     ├── markdown.service.test.js        # Markdown conversion & GFM tests
     └── token.service.test.js           # Token calculations & metrics tests
 ```
@@ -74,7 +89,7 @@ markrag-api/
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/markrag-api.git
+git clone https://github.com/artuturoh/markrag-api.git
 cd markrag-api
 npm install
 ```
@@ -89,7 +104,7 @@ cp .env.example .env
 
 | Variable | Default | Description |
 |---|---|---|
-| `PORT` | `3000` | Port for the HTTP server |
+| `PORT` | `3000` | Port for HTTP server |
 | `NODE_ENV` | `development` | `development` or `production` |
 | `RAPIDAPI_PROXY_SECRET` | *(empty)* | Optional. When defined, enforces `X-RapidAPI-Proxy-Secret` |
 | `FETCH_TIMEOUT_MS` | `5000` | Strict timeout in milliseconds (5s) |
@@ -115,60 +130,74 @@ npm test
 
 ## 📖 API Documentation
 
-### 1. Extract Article (`POST /v1/extract`)
+### Flagship Endpoint: `POST /v1/extract-and-chunk`
 
-Main endpoint for extracting clean Markdown and RAG metadata.
-
-#### Request Headers
-```http
-Content-Type: application/json
-X-RapidAPI-Proxy-Secret: <your-secret> (optional, if configured)
-```
+Extracts clean Markdown and computes hierarchy-aware semantic chunks with breadcrumbs and diagnostics.
 
 #### Request Body
 ```json
 {
-  "url": "https://example.com/blog/vector-search",
+  "url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
   "options": {
-    "strip_links": true,
-    "include_html": false,
-    "cache": true
+    "chunkSizeTokens": 512,
+    "chunkOverlapTokens": 50,
+    "includeLinks": true,
+    "includeImages": false,
+    "stripBoilerplate": true
   }
 }
 ```
 
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `url` | string | **Yes** | - | Target URL (must use `http://` or `https://`) |
-| `options.strip_links` | boolean | No | `false` | When `true`, strips hyperlinks into plain text to save tokens |
-| `options.include_html` | boolean | No | `false` | When `true`, includes Readability's clean HTML in the response |
-| `options.cache` | boolean | No | `true` | When `true`, checks and populates the 15-minute in-memory cache |
-
-#### Success Response (`200 OK`)
+#### Response (`200 OK`)
 ```json
 {
   "success": true,
   "data": {
-    "url": "https://example.com/blog/vector-search",
-    "title": "Introduction to Vector Search",
-    "byline": "Alice Smith",
-    "siteName": "AI Engineering",
-    "publishedTime": "2024-04-10T10:00:00Z",
-    "lang": "en",
-    "dir": null,
-    "excerpt": "Vector search is fundamental to semantic search and RAG...",
-    "markdown": "# Introduction to Vector Search\n\nVector search is fundamental to semantic search...",
+    "markdown": "# Retrieval-augmented generation\n\nRetrieval-augmented generation (RAG)...",
     "metadata": {
-      "wordCount": 1250,
-      "readingTimeMinutes": 7,
-      "characterCount": 7820,
-      "estimatedTokens": 1955,
-      "rawHtmlCharacterCount": 85400,
-      "rawHtmlTokens": 21350,
-      "tokensSaved": 19395,
-      "savingsPercentage": 90.8,
-      "cached": false,
-      "responseTimeMs": 142
+      "title": "Retrieval-augmented generation",
+      "author": null,
+      "canonicalUrl": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+      "citation": {
+        "markdown": "[Retrieval-augmented generation](https://en.wikipedia.org/wiki/Retrieval-augmented_generation)",
+        "text": "Retrieval-augmented generation - Wikipedia"
+      },
+      "linksSummary": { "internalCount": 24, "externalCount": 6, "sampleLinks": [...] }
+    },
+    "chunks": [
+      {
+        "index": 0,
+        "chunkId": "4c9e8b1d2f0a5e73",
+        "headingPath": ["Retrieval-augmented generation"],
+        "contextHeader": "[Section: Retrieval-augmented generation]\n",
+        "content": "# Retrieval-augmented generation\n\n...",
+        "tokenCount": 185,
+        "charCount": 740,
+        "hasCodeBlock": false,
+        "hasTable": false
+      }
+    ],
+    "cleaningStats": {
+      "rawHtmlBytes": 84250,
+      "cleanMarkdownBytes": 3810,
+      "tokensSaved": 20110,
+      "compressionRatioPercentage": 95.5
+    },
+    "qualityDiagnostics": {
+      "ragReadinessScore": 95,
+      "status": "optimal",
+      "flags": {
+        "isEmptyOrThinContent": false,
+        "requiresJavaScriptSpaShell": false,
+        "possiblePaywallOrLoginWall": false,
+        "hasStructuredHeadings": true
+      },
+      "warnings": []
+    },
+    "meta": {
+      "execution_time_ms": 115,
+      "timestamp": "2026-11-09T05:45:00.000Z",
+      "version": "2.0.0"
     }
   }
 }
@@ -176,80 +205,21 @@ X-RapidAPI-Proxy-Secret: <your-secret> (optional, if configured)
 
 ---
 
-### 2. Fast Extract (`GET /v1/extract`)
-
-Quick GET endpoint for browsers, simple cURL, or feed readers.
-
-```bash
-curl -X GET "http://localhost:3000/v1/extract?url=https://example.com/article&strip_links=true"
-```
-
----
-
-### 3. Health Check (`GET /health`)
-
-Designed for cloud keep-alive (Render, Railway) and uptime monitoring.
-
-#### Response (`200 OK`)
-```json
-{
-  "status": "ok",
-  "service": "MarkRAG API",
-  "version": "1.0.0",
-  "uptimeSeconds": 3600,
-  "timestamp": "2024-11-06T04:16:00.000Z",
-  "memory": {
-    "rssMb": 48,
-    "heapTotalMb": 32,
-    "heapUsedMb": 24
-  },
-  "cache": {
-    "activeEntries": 42
-  }
-}
-```
-
----
-
-## 🛡️ Error Handling & Status Codes
-
-All errors follow a standardized JSON format:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "URL must use HTTP or HTTPS protocol",
-    "details": null
-  }
-}
-```
-
-| HTTP Code | Error Code | Cause |
-|---|---|---|
-| `400` | `VALIDATION_ERROR` | Missing or invalid URL format / non-http protocol |
-| `401` | `UNAUTHORIZED` | Missing or invalid `X-RapidAPI-Proxy-Secret` |
-| `422` | `UNPROCESSABLE_CONTENT` | Empty document, pure JS SPA requiring browser rendering, or paywall |
-| `502` | `FETCH_ERROR` | DNS resolution failure or target server refused connection |
-| `504` | `FETCH_TIMEOUT` | Target URL took longer than 5 seconds to respond |
-| `500` | `INTERNAL_SERVER_ERROR` | Unexpected internal server exception |
-
----
-
 ## 🧪 Testing
 
-The test suite runs natively on Node.js using `node:test` with zero external test runners:
+The comprehensive test suite runs natively on Node.js using `node:test` and `supertest`:
 
 ```bash
 npm test
 ```
 
 Test coverage includes:
-- **Clean Service**: Content parsing, metadata extraction, stripping navigation/ads, edge cases.
-- **Markdown Service**: GFM tables, fenced code blocks with language annotations, `strip_links` behavior, newline normalization.
-- **Token Service**: Word count, reading time estimation, token calculations (~4 chars/token), token savings percentage.
-- **Endpoints & Security**: Zod validation, RapidAPI proxy secret verification, LRU caching, POST and GET methods.
+- **Root & Content Negotiation**: HTML landing page vs. JSON service descriptors.
+- **Health & Monitoring**: System uptime, memory, and cache statistics.
+- **Extraction & Parser**: Mozilla Readability, GFM table conversion, code blocks, boilerplate removal.
+- **Semantic Chunker**: Section hierarchies (`H1 > H2 > H3`), code block and table atomic preservation, deterministic chunkId hashes.
+- **Content Intelligence**: Quality diagnostics, SPA shell warnings, paywall flags.
+- **Security & Rate Limiting**: `RAPIDAPI_PROXY_SECRET` enforcement on `/v1/*` while allowing `/v1/demo` with 15 req/min rate limit.
 
 ---
 

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MarkRAG API - Web to Clean Markdown & RAG Parser for AI Agents</title>
-  <meta name="description" content="High-performance REST API converting any web article or documentation into clean, structured Markdown for LLMs and Vector Databases with 90%+ token savings.">
+  <title>MarkRAG API v2.0 — Intelligent RAG Knowledge Preprocessor & Semantic Chunker</title>
+  <meta name="description" content="MarkRAG API v2.0 — Next-generation intelligent RAG knowledge preprocessor, semantic chunker, and web-to-Markdown engine for AI agents, LLMs, and Vector Databases.">
   
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,11 +19,12 @@
         extend: {
           colors: {
             brand: {
-              dark: '#090d16',
-              surface: '#0d1322',
-              card: '#11192e',
-              border: '#1f293d',
+              dark: '#090D16',
+              surface: '#0f172a',
+              card: '#131d36',
+              border: '#1e293b',
               emerald: '#10b981',
+              indigo: '#6366f1',
               cyan: '#06b6d4',
             }
           },
@@ -38,25 +39,25 @@
 
   <style>
     body {
-      background-color: #090d16;
+      background-color: #090D16;
       font-family: 'Inter', sans-serif;
     }
     .bg-grid-pattern {
       background-size: 32px 32px;
       background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
     }
     .glow-radial {
-      background: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.18), rgba(6, 182, 212, 0.08) 35%, transparent 70%);
+      background: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.16), rgba(99, 102, 241, 0.1) 40%, transparent 70%);
     }
     .glass-card {
-      background: rgba(17, 25, 46, 0.7);
+      background: rgba(19, 29, 54, 0.7);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(31, 41, 61, 0.8);
+      border: 1px solid rgba(30, 41, 59, 0.85);
     }
     .glass-card:hover {
-      border-color: rgba(16, 185, 129, 0.4);
+      border-color: rgba(16, 185, 129, 0.45);
     }
   </style>
 </head>
@@ -66,17 +67,17 @@
   <div class="fixed top-0 left-0 right-0 h-96 glow-radial pointer-events-none z-0"></div>
 
   <!-- Header / Navigation -->
-  <header class="relative z-10 border-b border-brand-border/60 bg-brand-dark/80 backdrop-blur-md sticky top-0">
+  <header class="relative z-10 border-b border-brand-border/60 bg-brand-dark/85 backdrop-blur-md sticky top-0">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
       <!-- Brand Logo -->
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 p-0.5 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 via-teal-400 to-indigo-500 p-0.5 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
           <div class="w-full h-full bg-brand-dark rounded-[7px] flex items-center justify-center">
             <span class="text-emerald-400 font-mono font-bold text-lg">M#</span>
           </div>
         </div>
-        <span class="text-white font-bold text-xl tracking-tight">Mark<span class="text-emerald-400">RAG</span> <span class="text-xs uppercase px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-mono">API</span></span>
+        <span class="text-white font-bold text-xl tracking-tight">Mark<span class="text-emerald-400">RAG</span> <span class="text-xs uppercase px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-mono font-semibold">v2.0</span></span>
       </a>
 
       <!-- Right Nav Elements -->
@@ -93,7 +94,7 @@
 
         <!-- RapidAPI CTA Button -->
         <a href="https://rapidapi.com/artuturoh/api/markrag-web-to-clean-markdown-and-rag-parser" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-brand-dark bg-emerald-400 hover:bg-emerald-300 transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:-translate-y-0.5">
-          <span>RapidAPI</span>
+          <span>Get API Key on RapidAPI ⚡</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
           </svg>
@@ -103,24 +104,25 @@
   </header>
 
   <!-- Hero Section -->
-  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-20">
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16">
     <div class="text-center max-w-3xl mx-auto">
       
       <!-- Feature Announcement Pill -->
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-surface border border-brand-border text-xs font-medium text-slate-300 mb-6 shadow-sm">
-        <span class="flex h-2 w-2 rounded-full bg-cyan-400"></span>
-        <span>Powered by Mozilla Readability & GFM Markdown</span>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-surface border border-brand-border text-xs font-medium text-slate-300 mb-6 shadow-sm">
+        <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-emerald-300 font-semibold">MarkRAG v2.0:</span>
+        <span>Semantic Chunker, Metadata Intelligence & Quality Diagnostics</span>
       </div>
 
       <!-- Main Heading -->
-      <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight sm:leading-none mb-6">
-        Web to Clean Markdown <br class="hidden sm:inline"/>
-        <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">for AI & RAG Pipelines</span>
+      <h1 class="text-4xl sm:text-6xl font-extrabold text-[#FFFFFF] tracking-tight leading-tight sm:leading-none mb-6">
+        Intelligent RAG Knowledge <br class="hidden sm:inline"/>
+        <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">Preprocessor & Chunker</span>
       </h1>
 
       <!-- Subtitle -->
       <p class="text-lg sm:text-xl text-slate-400 leading-relaxed mb-10">
-        Web to Clean Markdown & RAG Parser for AI Agents and Vector Databases. Automatically strips cookie banners, navigation menus, ads, and tracking footers. Delivers crisp, structured Markdown with tables and code blocks ready for embeddings.
+        Transform messy web articles, blogs, and documentation into clean Markdown and deterministic, hierarchy-aware vector chunks. Automatically strip boilerplate, track heading breadcrumbs, and compute RAG readiness diagnostics.
       </p>
 
       <!-- Primary CTA Actions -->
@@ -129,10 +131,10 @@
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
-          <span>Subscribe on RapidAPI</span>
+          <span>Get API Key on RapidAPI ⚡</span>
         </a>
-        <a href="#quickstart" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-medium text-base text-slate-300 bg-brand-surface hover:bg-brand-card border border-brand-border hover:border-slate-600 transition-all">
-          <span class="font-mono text-emerald-400">&gt;</span> Quickstart Code
+        <a href="#studio" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-medium text-base text-slate-300 bg-brand-surface hover:bg-brand-card border border-brand-border hover:border-slate-600 transition-all">
+          <span class="font-mono text-emerald-400">&gt;</span> Live RAG Studio
         </a>
       </div>
     </div>
@@ -168,17 +170,17 @@
         </p>
       </div>
 
-      <!-- Metric 3: GFM & Tables -->
+      <!-- Metric 3: GFM & Semantic Chunks -->
       <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
-        <div class="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4 text-teal-400">
+        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4 text-indigo-400">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
           </svg>
         </div>
-        <div class="text-3xl font-extrabold text-white tracking-tight mb-1">GFM & Tables</div>
-        <div class="text-teal-400 font-semibold text-sm mb-2">Structured Extraction</div>
+        <div class="text-3xl font-extrabold text-white tracking-tight mb-1">Semantic Chunks</div>
+        <div class="text-indigo-400 font-semibold text-sm mb-2">Heading Hierarchy</div>
         <p class="text-slate-400 text-sm leading-relaxed">
-          Clean extraction preserving markdown tables, lists, blockquotes, and language-tagged code blocks (<code class="text-xs font-mono text-emerald-300">```python</code>, <code class="text-xs font-mono text-emerald-300">```sql</code>).
+          Clean extraction preserving markdown tables, lists, blockquotes, and language-tagged code blocks (```python, ```sql).
         </p>
       </div>
 
@@ -197,11 +199,136 @@
       </div>
     </div>
 
-    <!-- Interactive Code Quickstart Section -->
-    <div id="quickstart" class="max-w-4xl mx-auto scroll-mt-24">
+    <!-- ========================================== -->
+    <!-- INTERACTIVE LIVE RAG STUDIO SECTION        -->
+    <!-- ========================================== -->
+    <section id="studio" class="max-w-6xl mx-auto scroll-mt-24 mb-24">
       <div class="text-center mb-8">
-        <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Extract Any Webpage in 3 Lines</h2>
-        <p class="text-slate-400 text-sm mt-2">Plug MarkRAG API into your existing Python, Node.js, or cURL pipeline.</p>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-medium mb-3">
+          <span>⚡ Interactive Playground</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Live RAG Studio</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl mx-auto">
+          Test MarkRAG v2.0 live. Enter a URL or load sample HTML to generate semantic chunks, breadcrumb hierarchies, and content diagnostics in real-time.
+        </p>
+      </div>
+
+      <!-- Studio Input Controls Card -->
+      <div class="rounded-2xl border border-brand-border bg-brand-surface p-6 shadow-2xl mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+          
+          <!-- URL Input / Preset -->
+          <div class="lg:col-span-7">
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-medium text-slate-300 uppercase tracking-wider font-mono">Target Webpage or Article URL</label>
+              <button onclick="loadSampleArticle()" type="button" class="text-xs font-mono text-emerald-400 hover:text-emerald-300 underline transition-colors">
+                Load Sample Tech Article HTML
+              </button>
+            </div>
+            <div class="relative">
+              <input id="studio-url" type="url" value="https://en.wikipedia.org/wiki/Retrieval-augmented_generation" placeholder="https://example.com/article" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white text-sm font-mono focus:outline-none focus:border-emerald-500 transition-colors" />
+            </div>
+          </div>
+
+          <!-- Chunk Size Selector -->
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-medium text-slate-300 uppercase tracking-wider font-mono mb-2">Chunk Size (Tokens)</label>
+            <select id="studio-chunk-size" class="w-full px-3 py-3 rounded-xl bg-brand-card border border-brand-border text-white text-sm font-mono focus:outline-none focus:border-emerald-500 transition-colors">
+              <option value="256">256 tokens</option>
+              <option value="512" selected>512 tokens</option>
+              <option value="1024">1024 tokens</option>
+            </select>
+          </div>
+
+          <!-- Action Button -->
+          <div class="lg:col-span-3">
+            <button id="studio-submit-btn" onclick="runStudioExtraction()" type="button" class="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-brand-dark bg-emerald-400 hover:bg-emerald-300 transition-all shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5">
+              <span id="studio-btn-spinner" class="hidden animate-spin h-4 w-4 border-2 border-brand-dark border-t-transparent rounded-full"></span>
+              <span id="studio-btn-text">Extract & Chunk for RAG ⚡</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Optional HTML preview toggle container (hidden by default) -->
+        <div id="sample-badge-bar" class="hidden mt-3 pt-3 border-t border-brand-border/60 flex items-center justify-between text-xs font-mono text-slate-400">
+          <span class="text-emerald-400">✓ Sample Technical Article Loaded into parser</span>
+          <button onclick="clearSampleArticle()" class="text-rose-400 hover:underline">Clear</button>
+        </div>
+      </div>
+
+      <!-- Live Studio Metrics Bar -->
+      <div id="studio-metrics-bar" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-xl p-4 text-center">
+          <div class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">Tokens Saved</div>
+          <div id="metric-savings" class="text-2xl font-extrabold text-emerald-400 font-mono">92.4%</div>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+          <div class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">RAG Readiness</div>
+          <div id="metric-score" class="text-2xl font-extrabold text-teal-300 font-mono">95 / 100</div>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+          <div class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">Semantic Chunks</div>
+          <div id="metric-chunks" class="text-2xl font-extrabold text-indigo-400 font-mono">3 Chunks</div>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+          <div class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">Execution Latency</div>
+          <div id="metric-latency" class="text-2xl font-extrabold text-cyan-400 font-mono">115 ms</div>
+        </div>
+      </div>
+
+      <!-- Studio Result Tabs & Inspection Area -->
+      <div class="rounded-2xl border border-brand-border bg-brand-surface overflow-hidden shadow-2xl">
+        
+        <!-- Tab Navigation Bar -->
+        <div class="flex items-center justify-between border-b border-brand-border bg-brand-card/90 px-4 py-3">
+          <div class="flex items-center gap-2">
+            <button onclick="switchStudioTab('chunks')" id="studio-tab-chunks" class="studio-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all">
+              Semantic Chunks (Cards)
+            </button>
+            <button onclick="switchStudioTab('markdown')" id="studio-tab-markdown" class="studio-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+              Clean Markdown View
+            </button>
+            <button onclick="switchStudioTab('json')" id="studio-tab-json" class="studio-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+              Metadata & Diagnostics JSON
+            </button>
+          </div>
+
+          <!-- Tab Action (Copy Button) -->
+          <button onclick="copyActiveStudioContent()" id="studio-copy-btn" class="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white font-mono px-3 py-1.5 rounded-lg bg-brand-surface border border-brand-border hover:border-slate-600 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span id="studio-copy-text">Copy Content</span>
+          </button>
+        </div>
+
+        <!-- Studio Panes -->
+        <div class="p-5">
+          
+          <!-- Pane 1: Semantic Chunks View -->
+          <div id="studio-pane-chunks" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+            <!-- Chunk Cards Rendered Here Dynamically -->
+          </div>
+
+          <!-- Pane 2: Clean Markdown View -->
+          <div id="studio-pane-markdown" class="hidden">
+            <pre class="bg-brand-dark/95 border border-brand-border rounded-xl p-4 font-mono text-xs sm:text-sm text-slate-300 max-h-[550px] overflow-auto whitespace-pre-wrap leading-relaxed"><code id="studio-markdown-output">Click "Extract & Chunk for RAG ⚡" above to run the live studio...</code></pre>
+          </div>
+
+          <!-- Pane 3: Metadata & Diagnostics JSON View -->
+          <div id="studio-pane-json" class="hidden">
+            <pre class="bg-brand-dark/95 border border-brand-border rounded-xl p-4 font-mono text-xs sm:text-sm text-emerald-300 max-h-[550px] overflow-auto whitespace-pre leading-relaxed"><code id="studio-json-output">{}</code></pre>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Interactive Code Quickstart Section -->
+    <div id="quickstart" class="max-w-4xl mx-auto scroll-mt-24 mb-20">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Extract & Chunk in 3 Lines of Code</h2>
+        <p class="text-slate-400 text-sm mt-2">Plug MarkRAG v2.0 directly into LangChain, LlamaIndex, Qdrant, or Pinecone.</p>
       </div>
 
       <!-- Code Box -->
@@ -212,13 +339,13 @@
           
           <!-- Language Tabs -->
           <div class="flex items-center gap-2">
-            <button onclick="switchTab('curl')" id="tab-curl" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all">
+            <button onclick="switchCodeTab('curl')" id="tab-curl" class="code-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all">
               cURL
             </button>
-            <button onclick="switchTab('python')" id="tab-python" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+            <button onclick="switchCodeTab('python')" id="tab-python" class="code-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
               Python
             </button>
-            <button onclick="switchTab('node')" id="tab-node" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
+            <button onclick="switchCodeTab('node')" id="tab-node" class="code-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all">
               Node.js
             </button>
           </div>
@@ -236,144 +363,360 @@
         <div class="p-5 font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed">
           
           <!-- cURL Snippet -->
-          <pre id="code-curl" class="text-slate-300"><code><span class="text-cyan-400">curl</span> -X POST <span class="text-emerald-300">"https://markrag-api.onrender.com/v1/extract"</span> \
+          <pre id="code-curl" class="text-slate-300"><code><span class="text-cyan-400">curl</span> -X POST <span class="text-emerald-300">"https://markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com/v1/extract-and-chunk"</span> \
   -H <span class="text-emerald-300">"Content-Type: application/json"</span> \
   -H <span class="text-emerald-300">"X-RapidAPI-Key: YOUR_RAPIDAPI_KEY"</span> \
+  -H <span class="text-emerald-300">"X-RapidAPI-Host: markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com"</span> \
   -d <span class="text-amber-200">'{
-    "url": "https://example.com/blog/rag-pipeline",
-    "options": { "strip_links": true }
+    "url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+    "options": {
+      "chunkSizeTokens": 512,
+      "chunkOverlapTokens": 50,
+      "includeLinks": true
+    }
   }'</span></code></pre>
 
           <!-- Python Snippet -->
           <pre id="code-python" class="hidden text-slate-300"><code><span class="text-cyan-400">import</span> requests
 
 response = requests.post(
-    <span class="text-emerald-300">"https://markrag-api.onrender.com/v1/extract"</span>,
-    headers={<span class="text-emerald-300">"X-RapidAPI-Key"</span>: <span class="text-amber-200">"YOUR_RAPIDAPI_KEY"</span>},
+    <span class="text-emerald-300">"https://markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com/v1/extract-and-chunk"</span>,
+    headers={
+        <span class="text-emerald-300">"X-RapidAPI-Key"</span>: <span class="text-amber-200">"YOUR_RAPIDAPI_KEY"</span>,
+        <span class="text-emerald-300">"X-RapidAPI-Host"</span>: <span class="text-amber-200">"markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com"</span>
+    },
     json={
-        <span class="text-emerald-300">"url"</span>: <span class="text-amber-200">"https://example.com/blog/rag-pipeline"</span>,
-        <span class="text-emerald-300">"options"</span>: {<span class="text-emerald-300">"strip_links"</span>: <span class="text-cyan-400">True</span>}
+        <span class="text-emerald-300">"url"</span>: <span class="text-amber-200">"https://en.wikipedia.org/wiki/Retrieval-augmented_generation"</span>,
+        <span class="text-emerald-300">"options"</span>: {<span class="text-emerald-300">"chunkSizeTokens"</span>: <span class="text-cyan-400">512</span>}
     }
 )
 
 data = response.json()[<span class="text-emerald-300">"data"</span>]
-print(f<span class="text-amber-200">"Title: {data['title']} (Saved {data['metadata']['savingsPercentage']}%)"</span>)
-print(data[<span class="text-emerald-300">"markdown"</span>])</code></pre>
+print(f<span class="text-amber-200">"Title: {data['metadata']['title']}"</span>)
+print(f<span class="text-amber-200">"Generated {len(data['chunks'])} semantic chunks!"</span>)
+<span class="text-cyan-400">for</span> chunk <span class="text-cyan-400">in</span> data[<span class="text-emerald-300">"chunks"</span>]:
+    print(f<span class="text-amber-200">"[{chunk['chunkId']}] {' > '.join(chunk['headingPath'])} ({chunk['tokenCount']} tokens)"</span>)</code></pre>
 
           <!-- Node.js Snippet -->
-          <pre id="code-node" class="hidden text-slate-300"><code><span class="text-cyan-400">const</span> res = <span class="text-cyan-400">await</span> fetch(<span class="text-emerald-300">"https://markrag-api.onrender.com/v1/extract"</span>, {
+          <pre id="code-node" class="hidden text-slate-300"><code><span class="text-cyan-400">const</span> res = <span class="text-cyan-400">await</span> fetch(<span class="text-emerald-300">"https://markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com/v1/extract-and-chunk"</span>, {
   method: <span class="text-emerald-300">"POST"</span>,
   headers: {
     <span class="text-emerald-300">"Content-Type"</span>: <span class="text-emerald-300">"application/json"</span>,
-    <span class="text-emerald-300">"X-RapidAPI-Key"</span>: <span class="text-amber-200">"YOUR_RAPIDAPI_KEY"</span>
+    <span class="text-emerald-300">"X-RapidAPI-Key"</span>: <span class="text-amber-200">"YOUR_RAPIDAPI_KEY"</span>,
+    <span class="text-emerald-300">"X-RapidAPI-Host"</span>: <span class="text-amber-200">"markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com"</span>
   },
   body: JSON.stringify({
-    url: <span class="text-amber-200">"https://example.com/blog/rag-pipeline"</span>,
-    options: { strip_links: <span class="text-cyan-400">true</span> }
+    url: <span class="text-amber-200">"https://en.wikipedia.org/wiki/Retrieval-augmented_generation"</span>,
+    options: { chunkSizeTokens: <span class="text-cyan-400">512</span> }
   })
 });
 
 <span class="text-cyan-400">const</span> { data } = <span class="text-cyan-400">await</span> res.json();
-console.log(data.markdown);</code></pre>
-        </div>
-
-        <!-- Sample Response Preview -->
-        <div class="border-t border-brand-border bg-brand-dark/90 p-4">
-          <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-2">
-            <span>JSON Response Contract:</span>
-            <span class="text-emerald-400 font-semibold">200 OK · 142ms</span>
-          </div>
-          <div class="p-3 bg-brand-surface rounded-lg font-mono text-xs text-slate-400 overflow-x-auto border border-brand-border/60">
-            <span class="text-slate-500">{</span><br/>
-            &nbsp;&nbsp;<span class="text-cyan-400">"success"</span>: <span class="text-emerald-400">true</span>,<br/>
-            &nbsp;&nbsp;<span class="text-cyan-400">"data"</span>: <span class="text-slate-500">{</span><br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"title"</span>: <span class="text-emerald-300">"Building Modern RAG Systems"</span>,<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"publishedTime"</span>: <span class="text-emerald-300">"2024-05-01T12:00:00Z"</span>,<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"markdown"</span>: <span class="text-emerald-300">"# Building Modern RAG Systems\n\nRetrieval-Augmented Generation..."</span>,<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"metadata"</span>: <span class="text-slate-500">{</span><br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"estimatedTokens"</span>: <span class="text-amber-300">1820</span>,<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"rawHtmlTokens"</span>: <span class="text-amber-300">19450</span>,<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"tokensSaved"</span>: <span class="text-amber-300">17630</span>,<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"savingsPercentage"</span>: <span class="text-emerald-400">90.6</span>,<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-cyan-400">"cached"</span>: <span class="text-cyan-400">false</span><br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500">}</span><br/>
-            &nbsp;&nbsp;<span class="text-slate-500">}</span><br/>
-            <span class="text-slate-500">}</span>
-          </div>
+console.log(`Extracted: ${data.metadata.title}`);
+console.log(`Generated ${data.chunks.length} chunks. Saved ${data.cleaningStats.compressionRatioPercentage}% tokens!`);</code></pre>
         </div>
 
       </div>
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="relative z-10 border-t border-brand-border bg-brand-surface/70 py-8 text-center text-xs text-slate-500">
+  <!-- Footer (No GitHub links) -->
+  <footer class="relative z-10 border-t border-brand-border bg-brand-surface/80 py-8 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-2">
-        <span class="text-slate-400 font-semibold">MarkRAG API</span>
+        <span class="text-slate-300 font-semibold">MarkRAG v2.0</span>
         <span>•</span>
-        <span>High-Performance Microservice for AI Developers</span>
+        <span>Intelligent RAG Knowledge Preprocessor & Semantic Chunker</span>
       </div>
       <div class="flex items-center gap-4">
-        <a href="/health" class="hover:text-emerald-400 transition-colors">/health</a>
+        <a href="/health" class="hover:text-emerald-400 transition-colors">System Health</a>
         <span>•</span>
-        <a href="https://rapidapi.com/artuturoh/api/markrag-web-to-clean-markdown-and-rag-parser" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 transition-colors">RapidAPI Marketplace</a>
+        <a href="https://rapidapi.com/artuturoh/api/markrag-web-to-clean-markdown-and-rag-parser" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">Get API Key on RapidAPI ⚡</a>
       </div>
     </div>
   </footer>
 
-  <!-- Code Tab Switcher & Copy Handler -->
+  <!-- Embedded JavaScript for Studio and Tabs -->
   <script>
-    let activeSnippet = 'curl';
+    // Sample HTML preset
+    const SAMPLE_HTML_ARTICLE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Architecture of Modern RAG Systems: Vector Databases & Semantic Retrieval</title>
+  <meta name="author" content="Dr. Elena Vance">
+  <meta name="description" content="In-depth analysis of high-throughput RAG systems combining dense embeddings, hierarchical chunking, and cross-encoder re-ranking.">
+  <meta property="article:published_time" content="2026-04-12T14:30:00Z">
+  <meta property="og:site_name" content="AI Systems Journal">
+</head>
+<body>
+  <nav><a href="/">Home</a><a href="/about">About</a></nav>
+  <aside class="advertisement"><p>Sponsored: Upgrade your GPU cloud today!</p></aside>
+  <main>
+    <article>
+      <h1>Architecture of Modern RAG Systems</h1>
+      <p class="byline">By Dr. Elena Vance | Published April 12, 2026</p>
+      <p>Retrieval-Augmented Generation (RAG) bridges external proprietary knowledge with frozen LLM checkpoints. High-quality vector search requires deterministic preprocessing, noise stripping, and hierarchy-preserving chunking.</p>
+      
+      <h2>1. The Knowledge Preprocessing Bottleneck</h2>
+      <p>Raw HTML fetched from the open web contains up to 85% noise: navigation headers, cookie banners, tracking scripts, and sidebars. Feeding raw HTML into embedding models degrades cosine similarity and pollutes context windows.</p>
+      
+      <h2>2. Dense Vector Indexing and Re-Ranking</h2>
+      <p>Once content is cleaned into structured Markdown, documents are split into semantic chunks respecting heading breadcrumbs. The embeddings are stored in high-performance vector databases.</p>
+      <table>
+        <thead>
+          <tr><th>Vector DB</th><th>Max QPS</th><th>Filtering Latency</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Qdrant</td><td>4,200</td><td>1.2 ms</td></tr>
+          <tr><td>Pinecone Serverless</td><td>3,800</td><td>2.1 ms</td></tr>
+          <tr><td>pgvector (HNSW)</td><td>1,950</td><td>3.4 ms</td></tr>
+        </tbody>
+      </table>
 
+      <h3>Implementation Snippet</h3>
+      <pre><code class="language-python">def upsert_chunks(client, chunks):
+    records = []
+    for chunk in chunks:
+        vector = embed(chunk["content"])
+        records.append({
+            "id": chunk["chunkId"],
+            "vector": vector,
+            "payload": {
+                "section": " > ".join(chunk["headingPath"]),
+                "tokens": chunk["tokenCount"]
+            }
+        })
+    return client.upsert(records)</code></pre>
+    </article>
+  </main>
+  <footer><p>&copy; 2026 AI Systems Journal. All rights reserved.</p></footer>
+</body>
+</html>`;
+
+    let activeStudioData = null;
+    let customHtmlPayload = null;
+
+    function loadSampleArticle() {
+      customHtmlPayload = SAMPLE_HTML_ARTICLE;
+      document.getElementById('studio-url').value = 'https://ai-systems-journal.internal/architecture-of-modern-rag-systems';
+      document.getElementById('sample-badge-bar').classList.remove('hidden');
+    }
+
+    function clearSampleArticle() {
+      customHtmlPayload = null;
+      document.getElementById('sample-badge-bar').classList.add('hidden');
+      document.getElementById('studio-url').value = 'https://en.wikipedia.org/wiki/Retrieval-augmented_generation';
+    }
+
+    async function runStudioExtraction() {
+      const urlInput = document.getElementById('studio-url').value.trim();
+      const chunkSize = parseInt(document.getElementById('studio-chunk-size').value, 10) || 512;
+      const submitBtn = document.getElementById('studio-submit-btn');
+      const spinner = document.getElementById('studio-btn-spinner');
+      const btnText = document.getElementById('studio-btn-text');
+
+      submitBtn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.textContent = 'Processing RAG Chunks...';
+
+      const payload = {
+        options: {
+          chunkSizeTokens: chunkSize,
+          chunkOverlapTokens: 50,
+          includeLinks: true
+        }
+      };
+
+      if (customHtmlPayload) {
+        payload.html = customHtmlPayload;
+        payload.url = urlInput || 'https://ai-systems-journal.internal/architecture-of-modern-rag-systems';
+      } else {
+        payload.url = urlInput || 'https://en.wikipedia.org/wiki/Retrieval-augmented_generation';
+      }
+
+      try {
+        const response = await fetch('/v1/demo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const json = await response.json();
+        if (!response.ok) {
+          throw new Error(json.error?.message || 'Failed to process request');
+        }
+
+        activeStudioData = json.data;
+        renderStudioResults(json.data);
+      } catch (err) {
+        alert('Studio Error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.textContent = 'Extract & Chunk for RAG ⚡';
+      }
+    }
+
+    function renderStudioResults(data) {
+      // Update Metrics Bar
+      const savings = data.cleaningStats?.compressionRatioPercentage || data.tokenMetrics?.compressionRatioPercentage || 0;
+      document.getElementById('metric-savings').textContent = savings + '%';
+      
+      const score = data.qualityDiagnostics?.ragReadinessScore ?? 100;
+      const status = data.qualityDiagnostics?.status || 'optimal';
+      document.getElementById('metric-score').textContent = score + ' / 100';
+
+      const chunkCount = data.chunks ? data.chunks.length : 0;
+      document.getElementById('metric-chunks').textContent = chunkCount + (chunkCount === 1 ? ' Chunk' : ' Chunks');
+
+      const latency = data.meta?.execution_time_ms ?? 0;
+      document.getElementById('metric-latency').textContent = latency + ' ms';
+
+      // Render Chunks View
+      const chunksContainer = document.getElementById('studio-pane-chunks');
+      chunksContainer.innerHTML = '';
+
+      if (data.chunks && data.chunks.length > 0) {
+        data.chunks.forEach(function(chunk) {
+          const card = document.createElement('div');
+          card.className = 'glass-card rounded-xl p-4 border border-brand-border/80 hover:border-emerald-500/40 transition-all';
+          
+          const breadcrumbs = (chunk.headingPath && chunk.headingPath.length > 0)
+            ? chunk.headingPath.join(' › ')
+            : 'Root Section';
+
+          let badges = '';
+          if (chunk.hasCodeBlock) badges += '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Code Block</span> ';
+          if (chunk.hasTable) badges += '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-teal-500/20 text-teal-300 border border-teal-500/30">Table</span> ';
+
+          card.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2 pb-2 border-b border-brand-border/60">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold">#${chunk.index}</span>
+                <span class="text-xs font-mono font-medium text-slate-300 truncate max-w-md" title="${breadcrumbs}">${breadcrumbs}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                ${badges}
+                <span class="px-2 py-0.5 rounded bg-brand-surface text-slate-400 font-mono text-[11px] border border-brand-border">${chunk.tokenCount} tokens</span>
+                <span class="px-2 py-0.5 rounded bg-brand-surface text-cyan-400 font-mono text-[11px] border border-brand-border" title="SHA-256 chunkId">${chunk.chunkId}</span>
+              </div>
+            </div>
+            <pre class="font-mono text-xs text-slate-300 whitespace-pre-wrap leading-relaxed overflow-x-auto bg-brand-dark/80 p-3 rounded-lg border border-brand-border/40"><code>${escapeHtml(chunk.content)}</code></pre>
+          `;
+          chunksContainer.appendChild(card);
+        });
+      } else {
+        chunksContainer.innerHTML = '<p class="text-xs text-slate-400 font-mono">No chunks generated.</p>';
+      }
+
+      // Render Markdown View
+      document.getElementById('studio-markdown-output').textContent = data.markdown || '';
+
+      // Render JSON View
+      document.getElementById('studio-json-output').textContent = JSON.stringify({
+        metadata: data.metadata,
+        qualityDiagnostics: data.qualityDiagnostics,
+        cleaningStats: data.cleaningStats,
+        meta: data.meta
+      }, null, 2);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function switchStudioTab(tab) {
+      ['chunks', 'markdown', 'json'].forEach(function(t) {
+        const btn = document.getElementById('studio-tab-' + t);
+        const pane = document.getElementById('studio-pane-' + t);
+        if (t === tab) {
+          btn.className = 'studio-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all';
+          pane.classList.remove('hidden');
+        } else {
+          btn.className = 'studio-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all';
+          pane.classList.add('hidden');
+        }
+      });
+    }
+
+    function copyActiveStudioContent() {
+      if (!activeStudioData) {
+        alert('Please run the studio extraction first.');
+        return;
+      }
+      const text = activeStudioData.markdown || '';
+      navigator.clipboard.writeText(text).then(function() {
+        const btnText = document.getElementById('studio-copy-text');
+        btnText.textContent = 'Copied Markdown!';
+        setTimeout(function() {
+          btnText.textContent = 'Copy Content';
+        }, 2000);
+      });
+    }
+
+    // Code snippet switcher
+    let activeSnippet = 'curl';
     const snippets = {
-      curl: `curl -X POST "https://markrag-api.onrender.com/v1/extract" \\
+      curl: `curl -X POST "https://markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com/v1/extract-and-chunk" \\
   -H "Content-Type: application/json" \\
   -H "X-RapidAPI-Key: YOUR_RAPIDAPI_KEY" \\
+  -H "X-RapidAPI-Host: markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com" \\
   -d '{
-    "url": "https://example.com/blog/rag-pipeline",
-    "options": { "strip_links": true }
+    "url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+    "options": {
+      "chunkSizeTokens": 512,
+      "chunkOverlapTokens": 50,
+      "includeLinks": true
+    }
   }'`,
       python: `import requests
 
 response = requests.post(
-    "https://markrag-api.onrender.com/v1/extract",
-    headers={"X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY"},
+    "https://markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com/v1/extract-and-chunk",
+    headers={
+        "X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY",
+        "X-RapidAPI-Host": "markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com"
+    },
     json={
-        "url": "https://example.com/blog/rag-pipeline",
-        "options": {"strip_links": True}
+        "url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+        "options": {"chunkSizeTokens": 512}
     }
 )
 
 data = response.json()["data"]
-print(f"Title: {data['title']} (Saved {data['metadata']['savingsPercentage']}%)")
-print(data["markdown"])`,
-      node: `const res = await fetch("https://markrag-api.onrender.com/v1/extract", {
+print(f"Title: {data['metadata']['title']}")
+print(f"Generated {len(data['chunks'])} semantic chunks!")
+for chunk in data["chunks"]:
+    print(f"[{chunk['chunkId']}] {' > '.join(chunk['headingPath'])} ({chunk['tokenCount']} tokens)")`,
+      node: `const res = await fetch("https://markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com/v1/extract-and-chunk", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    "X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY"
+    "X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY",
+    "X-RapidAPI-Host": "markrag-web-to-clean-markdown-and-rag-parser.p.rapidapi.com"
   },
   body: JSON.stringify({
-    url: "https://example.com/blog/rag-pipeline",
-    options: { strip_links: true }
+    url: "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+    options: { chunkSizeTokens: 512 }
   })
 });
 
 const { data } = await res.json();
-console.log(data.markdown);`
+console.log(\`Extracted: \${data.metadata.title}\`);
+console.log(\`Generated \${data.chunks.length} chunks. Saved \${data.cleaningStats.compressionRatioPercentage}% tokens!\`);`
     };
 
-    function switchTab(lang) {
+    function switchCodeTab(lang) {
       activeSnippet = lang;
       ['curl', 'python', 'node'].forEach(function(l) {
         const btn = document.getElementById('tab-' + l);
         const code = document.getElementById('code-' + l);
         if (l === lang) {
-          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all';
+          btn.className = 'code-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 transition-all';
           code.classList.remove('hidden');
         } else {
-          btn.className = 'tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all';
+          btn.className = 'code-tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white border border-transparent transition-all';
           code.classList.add('hidden');
         }
       });
@@ -389,6 +732,12 @@ console.log(data.markdown);`
         }, 2000);
       });
     }
+
+    // Auto-run preset on page load for immediate visual gratification
+    window.addEventListener('DOMContentLoaded', function() {
+      loadSampleArticle();
+      runStudioExtraction();
+    });
   </script>
 </body>
 </html>
