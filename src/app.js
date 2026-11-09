@@ -28,8 +28,9 @@ app.use(
 // Enable CORS
 app.use(cors());
 
-// Serve static assets from public directory without automatically hijacking root index
+// Serve static assets from public & src/public directories without automatically hijacking root index
 app.use(express.static(path.resolve('public'), { index: false }));
+app.use(express.static(path.resolve('src', 'public'), { index: false }));
 
 // Body parsing with safe size limits
 app.use(express.json({ limit: '1mb' }));

@@ -1,6 +1,9 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
+import vm from 'node:vm';
+import fs from 'node:fs';
+import path from 'node:path';
 import app from '../src/app.js';
 import { fetcherService } from '../src/services/fetcher.service.js';
 import { cacheService } from '../src/services/cache.service.js';
@@ -12,11 +15,14 @@ describe('MarkRAG API Endpoints', () => {
   beforeEach(() => {
     cacheService.clear();
     originalFetch = fetcherService.fetch;
+    config.rapidApiProxySecret = null;
+    delete process.env.RAPIDAPI_PROXY_SECRET;
   });
 
   afterEach(() => {
     fetcherService.fetch = originalFetch;
     config.rapidApiProxySecret = null;
+    delete process.env.RAPIDAPI_PROXY_SECRET;
   });
 
   describe('GET / (Root Landing Page & Content Negotiation)', () => {
@@ -57,6 +63,55 @@ describe('MarkRAG API Endpoints', () => {
       assert.ok(csp.includes('cdn.tailwindcss.com'));
       assert.ok(csp.includes('fonts.googleapis.com'));
       assert.ok(csp.includes('fonts.gstatic.com'));
+    });
+  });
+
+  describe('GET /studio.js (Studio Client Script Verification)', () => {
+    it('should serve studio.js with 200 OK and application/javascript Content-Type', async () => {
+      const res = await request(app).get('/studio.js');
+
+      assert.strictEqual(res.status, 200);
+      assert.ok(res.headers['content-type'].includes('javascript'));
+      assert.ok(res.text.length > 500);
+    });
+
+    it('should compile studio.js via Node vm.Script with ZERO JavaScript syntax errors', async () => {
+      const res = await request(app).get('/studio.js');
+      assert.strictEqual(res.status, 200);
+
+      assert.doesNotThrow(() => {
+        new vm.Script(res.text, { filename: 'studio.js' });
+      }, 'studio.js must compile cleanly with 0 syntax errors');
+    });
+
+    it('should ensure every DOM ID referenced in studio.js exists in public/index.html', async () => {
+      const studioRes = await request(app).get('/studio.js');
+      const indexRes = await request(app).get('/').set('Accept', 'text/html');
+
+      assert.strictEqual(studioRes.status, 200);
+      assert.strictEqual(indexRes.status, 200);
+
+      // Match all document.getElementById('...') calls
+      const idMatches = [...studioRes.text.matchAll(/document\.getElementById\(['"]([^'"]+)['"]\)/g)];
+      const referencedIds = [...new Set(idMatches.map((m) => m[1]))];
+
+      assert.ok(referencedIds.length >= 10, 'Should find interactive element IDs in studio.js');
+
+      for (const elementId of referencedIds) {
+        // Fallback or dynamic IDs rendered in HTML or inside containers
+        if (elementId === 'error-fallback-sample-btn') continue;
+
+        const hasId = indexRes.text.includes(`id="${elementId}"`);
+        assert.ok(hasId, `Expected ID "${elementId}" referenced in studio.js to exist in public/index.html`);
+      }
+    });
+
+    it('should exempt GET /studio.js from RapidAPI proxy secret checks', async () => {
+      config.rapidApiProxySecret = 'secret_test_key_123';
+      process.env.RAPIDAPI_PROXY_SECRET = 'secret_test_key_123';
+
+      const res = await request(app).get('/studio.js');
+      assert.strictEqual(res.status, 200);
     });
   });
 

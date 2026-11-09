@@ -1,7 +1,20 @@
 import { Router } from 'express';
 import path from 'path';
+import fs from 'fs';
 
 const router = Router();
+
+/**
+ * Static client JavaScript for the Interactive Live RAG Studio
+ * Served with explicit Content-Type header and charset
+ */
+router.get('/studio.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  const primaryPath = path.resolve('public', 'studio.js');
+  const fallbackPath = path.resolve('src', 'public', 'studio.js');
+  const targetPath = fs.existsSync(primaryPath) ? primaryPath : fallbackPath;
+  return res.sendFile(targetPath);
+});
 
 /**
  * Root endpoint GET /

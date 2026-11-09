@@ -20,7 +20,7 @@ export function demoRateLimiter(req, res, next) {
 
   const now = Date.now();
   const windowMs = 60 * 1000;
-  const maxRequests = 15;
+  const maxRequests = 5;
 
   let record = demoRateLimitStore.get(ip);
   if (!record || now - record.startTime > windowMs) {
@@ -36,7 +36,7 @@ export function demoRateLimiter(req, res, next) {
       success: false,
       error: {
         code: 'RATE_LIMIT_EXCEEDED',
-        message: 'Demo rate limit exceeded (max 15 requests per minute). Please subscribe on RapidAPI for unlimited access.',
+        message: 'Demo rate limit exceeded (max 5 requests per minute). Please subscribe on RapidAPI for unlimited access.',
         details: null,
       },
     });
@@ -65,12 +65,14 @@ export function rapidApiSecurityMiddleware(req, res, next) {
     return next();
   }
 
-  // Exempt routes
+  // Exempt routes (landing page, health check, demo, and studio static assets)
   const path = req.path || req.originalUrl || '';
   if (
     path === '/' ||
     path === '/health' ||
+    path === '/studio.js' ||
     path === '/v1/demo' ||
+    path.endsWith('/studio.js') ||
     path.endsWith('/demo') ||
     path.endsWith('/health')
   ) {

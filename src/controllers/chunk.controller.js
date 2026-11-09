@@ -57,29 +57,41 @@ export class ChunkController {
         canonicalUrl,
       });
 
+      const isDemo = req.path?.includes('/demo') || req.originalUrl?.includes('/demo');
+      const cappedChunks = isDemo ? chunks.slice(0, 3) : chunks;
+
       const executionTimeMs = Date.now() - startTime;
 
       logger.info(`Extract-and-chunk complete for ${canonicalUrl}`, {
         chunksCount: chunks.length,
+        isDemo,
         ragScore: intelligence.qualityDiagnostics.ragReadinessScore,
         latencyMs: executionTimeMs,
       });
 
+      const responseData = {
+        markdown,
+        metadata: intelligence.metadata,
+        chunks: cappedChunks,
+        cleaningStats: intelligence.cleaningStats,
+        tokenMetrics: intelligence.tokenMetrics,
+        qualityDiagnostics: intelligence.qualityDiagnostics,
+        meta: {
+          execution_time_ms: executionTimeMs,
+          timestamp: new Date().toISOString(),
+          version: '2.0.0',
+        },
+      };
+
+      if (isDemo) {
+        responseData.demoNotice = 'Preview limited to 3 chunks in Live Studio. Subscribe on RapidAPI for full unlocked output.';
+        responseData.isDemoPreview = true;
+        responseData.totalChunksGenerated = chunks.length;
+      }
+
       return res.status(200).json({
         success: true,
-        data: {
-          markdown,
-          metadata: intelligence.metadata,
-          chunks,
-          cleaningStats: intelligence.cleaningStats,
-          tokenMetrics: intelligence.tokenMetrics,
-          qualityDiagnostics: intelligence.qualityDiagnostics,
-          meta: {
-            execution_time_ms: executionTimeMs,
-            timestamp: new Date().toISOString(),
-            version: '2.0.0',
-          },
-        },
+        data: responseData,
       });
     } catch (error) {
       next(error);

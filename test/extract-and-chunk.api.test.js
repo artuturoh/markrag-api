@@ -191,27 +191,31 @@ describe('MarkRAG v2.0 — POST /v1/extract-and-chunk & Studio Endpoints', () =>
 
     assert.strictEqual(resWithSecret.status, 200);
 
-    // 3. /v1/demo without secret -> 200 (exempt for live studio)
+    // 3. /v1/demo without secret -> 200 (exempt for live studio) and enforces preview cap
     const resDemo = await request(app)
       .post('/v1/demo')
       .send({ html: sampleValidHtml });
 
     assert.strictEqual(resDemo.status, 200);
     assert.ok(resDemo.body.data.chunks.length >= 1);
+    assert.ok(resDemo.body.data.chunks.length <= 3);
+    assert.strictEqual(resDemo.body.data.isDemoPreview, true);
+    assert.ok(resDemo.body.data.demoNotice.includes('Preview limited to 3 chunks'));
   });
 
-  it('should rate-limit /v1/demo to 15 requests per minute per IP', async () => {
+  it('should rate-limit /v1/demo to 5 requests per minute per IP and enforce anti-theft preview cap', async () => {
     resetDemoRateLimiter();
 
-    // Send 15 requests -> all should succeed
-    for (let i = 0; i < 15; i++) {
+    // Send 5 requests -> all should succeed
+    for (let i = 0; i < 5; i++) {
       const res = await request(app)
         .post('/v1/demo')
         .send({ html: sampleValidHtml });
       assert.strictEqual(res.status, 200, `Request #${i + 1} should succeed`);
+      assert.ok(res.body.data.chunks.length <= 3);
     }
 
-    // 16th request must trigger 429 Too Many Requests
+    // 6th request must trigger 429 Too Many Requests
     const resOverLimit = await request(app)
       .post('/v1/demo')
       .send({ html: sampleValidHtml });
